@@ -1,0 +1,1855 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matokeo — Kata ya Kitutu</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%230F3D2E'/><circle cx='50' cy='50' r='46' fill='none' stroke='%23C89B3C' stroke-width='3'/><text x='50' y='66' font-size='46' text-anchor='middle' fill='%23C89B3C' font-family='serif'>K</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green-900:#0F3D2E;
+    --green-700:#175C43;
+    --green-050:#EAF3EE;
+    --cream:#F7F2E7;
+    --cream-dark:#EDE4CF;
+    --gold:#C89B3C;
+    --gold-dark:#9C7A2C;
+    --ink:#1F2933;
+    --ink-soft:#4B5A62;
+    --brick:#B23A2E;
+    --line: rgba(31,41,51,.12);
+    --radius: 16px;
+    --shadow: 0 10px 30px rgba(15,61,46,.10);
+    --shadow-lg: 0 20px 50px rgba(15,61,46,.16);
+    --font-display: 'Fraunces', serif;
+    --font-body: 'Inter', system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--cream);
+    color: var(--ink);
+    font-family: var(--font-body);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    background-image:
+      radial-gradient(circle at 8% 6%, rgba(15,61,46,.07), transparent 42%),
+      radial-gradient(circle at 92% 96%, rgba(200,155,60,.12), transparent 42%);
+    min-height:100vh;
+  }
+  #app{ max-width:1080px; margin:0 auto; padding: 0 22px 90px; animation: viewIn .35s ease; }
+  @keyframes viewIn{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;} }
+  @media (prefers-reduced-motion: reduce){ #app, .hero-art .stamp, .stamp-confirm .stamp{ animation:none !important; } }
+
+  h1,h2,h3,h4{ font-family:var(--font-display); color:var(--green-900); margin:0 0 .4em; letter-spacing:-.01em; }
+
+  /* ---------- Header / bars ---------- */
+  .site-header{ display:flex; align-items:center; gap:10px; padding:24px 0 0; }
+  .brand{ display:flex; align-items:center; gap:10px; font-family:var(--font-display); font-weight:700; letter-spacing:.5px; color:var(--green-900); font-size:1.12rem; }
+  .brand .stamp{ width:38px; height:38px; }
+
+  .bar{
+    position:sticky; top:0; z-index:20;
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+    margin:0 -22px 30px; padding:18px 22px;
+    background:rgba(247,242,231,.9); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .bar h1{ flex:1; font-size:1.4rem; margin:0; }
+  .back{
+    background:#fff; border:1px solid var(--line); color:var(--green-900); font-family:var(--font-body);
+    font-weight:600; font-size:.85rem; padding:9px 16px; border-radius:999px; cursor:pointer; white-space:nowrap;
+    box-shadow:0 1px 3px rgba(0,0,0,.06); transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .back:hover{ background:var(--green-050); transform:translateY(-1px); box-shadow:0 4px 10px rgba(0,0,0,.08); }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    display:flex; align-items:center; gap:40px; flex-wrap:wrap;
+    background:#fff; border:1px solid var(--line); border-radius:24px; box-shadow:var(--shadow);
+    padding:44px 44px; margin:28px 0 34px;
+  }
+  .hero-copy{ flex:1 1 420px; }
+  .eyebrow{ text-transform:uppercase; letter-spacing:3px; font-size:.72rem; color:var(--gold-dark); font-weight:700; margin-bottom:12px; }
+  .hero h1{ font-size:clamp(2rem,4vw,2.9rem); line-height:1.1; margin-bottom:18px; }
+  .hero h1 em{ font-style:italic; color:var(--gold-dark); }
+  .lede{ color:var(--ink-soft); font-size:1.03rem; max-width:46ch; }
+  .hero-art{ flex:0 0 auto; margin:0 auto; }
+  .hero-art .stamp{ width:160px; height:160px; animation:slowspin 55s linear infinite; }
+  @keyframes slowspin{ to{ transform:rotate(360deg); } }
+  @media (max-width:820px){ .hero{ flex-direction:column; text-align:center; padding:36px 26px; } .lede{ margin:0 auto; } }
+
+  /* ---------- Role tabs ---------- */
+  .roles{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; padding:0 0 12px; }
+  @media (max-width:820px){ .roles{ grid-template-columns:1fr; } }
+  .role-tab{
+    position:relative; overflow:hidden; background:#fff; border:1px solid var(--line); border-radius:var(--radius);
+    padding:32px 24px 26px; text-align:left; cursor:pointer; font-family:inherit; color:inherit;
+    box-shadow:var(--shadow); transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
+  .role-tab::before{
+    content:''; position:absolute; top:0; left:0; right:0; height:5px;
+    background:linear-gradient(90deg, var(--green-700), var(--gold));
+  }
+  .role-tab:hover{ transform:translateY(-5px); box-shadow:var(--shadow-lg); border-color:transparent; }
+  .role-tab:focus-visible{ outline:3px solid var(--gold); outline-offset:3px; }
+  .role-mark{
+    width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-display); font-style:italic; font-size:1.35rem; font-weight:600;
+    border:2px solid var(--gold); color:var(--green-900); margin-bottom:16px;
+    box-shadow:0 3px 8px rgba(0,0,0,.06);
+  }
+  .role-teacher .role-mark{ background:var(--green-050); }
+  .role-student .role-mark{ background:var(--cream-dark); }
+  .role-admin .role-mark{ background:#F4E9D4; }
+  .role-tab h2{ font-size:1.32rem; margin-bottom:7px; }
+  .role-tab p{ color:var(--ink-soft); font-size:.92rem; margin:0 0 18px; }
+  .role-cta{ font-weight:700; color:var(--green-700); font-size:.88rem; }
+  .footnote{ text-align:center; color:var(--ink-soft); font-size:.82rem; padding:24px 0 10px; }
+
+  /* ---------- Buttons & inputs ---------- */
+  .btn{
+    font-family:var(--font-body); font-weight:600; border-radius:11px; padding:11px 20px; border:1px solid transparent;
+    cursor:pointer; font-size:.9rem; box-shadow:0 1px 2px rgba(0,0,0,.05);
+    transition:transform .12s ease, box-shadow .12s ease, background .12s ease;
+  }
+  .btn:hover{ transform:translateY(-1px); }
+  .btn.primary{ background:var(--green-900); color:#fff; box-shadow:0 4px 14px rgba(15,61,46,.28); }
+  .btn.primary:hover{ background:var(--green-700); box-shadow:0 6px 18px rgba(15,61,46,.34); }
+  .btn.ghost{ background:#fff; border-color:var(--line); color:var(--ink); }
+  .btn.ghost:hover{ background:var(--green-050); }
+  .btn.danger{ background:var(--brick); color:#fff; box-shadow:0 4px 14px rgba(178,58,46,.28); }
+  .btn.danger:hover{ background:#8f2c22; }
+  .btn.block{ width:100%; display:block; margin-top:16px; }
+  .btn:disabled{ opacity:.4; cursor:not-allowed; transform:none; box-shadow:none; }
+  .btn:focus-visible, input:focus-visible, .tab:focus-visible, .icon-btn:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
+
+  input[type=text], input[type=password], input[type=number], input[type=search], select{
+    font-family:var(--font-body); font-size:.95rem; padding:11px 13px; border:1px solid var(--line);
+    border-radius:11px; background:#fff; width:100%; transition:border-color .12s ease, box-shadow .12s ease;
+  }
+  input:focus, select:focus{ border-color:var(--gold); box-shadow:0 0 0 3px rgba(200,155,60,.15); outline:none; }
+  label{ display:block; margin-bottom:16px; font-weight:600; font-size:.86rem; color:var(--ink-soft); }
+  label input{ margin-top:6px; font-weight:400; color:var(--ink); }
+  .form-card{ background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:28px; box-shadow:var(--shadow); max-width:640px; }
+
+  /* ---------- Teacher: school list ---------- */
+  .school-list{ display:grid; gap:14px; }
+  .school-card{
+    display:flex; align-items:center; gap:16px; background:#fff; border:1px solid var(--line); border-radius:var(--radius);
+    padding:20px 22px; cursor:pointer; font-family:inherit; text-align:left; box-shadow:var(--shadow); width:100%;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .school-card:hover{ transform:translateY(-3px); box-shadow:var(--shadow-lg); }
+  .school-mark{ width:46px; height:46px; border-radius:50%; background:var(--green-900); color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-weight:700; flex-shrink:0; }
+  .school-name{ flex:1; font-weight:700; font-size:1.04rem; }
+  .chev{ color:var(--gold-dark); font-size:1.1rem; }
+
+  /* ---------- Teacher dashboard ---------- */
+  .dash-toolbar, .panel-toolbar{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:20px; flex-wrap:wrap; }
+  .count-pill{ background:var(--green-050); color:var(--green-900); padding:7px 16px; border-radius:999px; font-size:.82rem; font-weight:700; }
+  .student-list{ display:grid; gap:11px; }
+  .student-row{
+    display:flex; align-items:center; justify-content:space-between; background:#fff; border:1px solid var(--line);
+    border-radius:14px; padding:15px 18px; gap:10px; flex-wrap:wrap; transition:box-shadow .12s ease;
+  }
+  .student-row:hover{ box-shadow:var(--shadow); }
+  .student-info{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .mono{ font-family:var(--font-mono); color:var(--ink-soft); font-size:.85rem; }
+  .tag{ font-family:var(--font-mono); font-size:.76rem; font-weight:700; padding:4px 10px; border-radius:7px; }
+  .tag.grade-A{ background:#E4F3E9; color:#1E7A46; }
+  .tag.grade-B{ background:#EEF6E1; color:#5C7A1E; }
+  .tag.grade-C{ background:#FCEFDA; color:#B4711A; }
+  .tag.grade-D{ background:#FBE3D6; color:#B4451A; }
+  .tag.grade-F{ background:#FADCD9; color:#A5271D; }
+  .tag.grade-none{ background:#EDEDED; color:#7A7A7A; }
+  .tag.status-complete{ background:#E4F3E9; color:#1E7A46; }
+  .tag.status-partial{ background:#FCEFDA; color:#B4711A; }
+  .student-actions{ display:flex; gap:6px; }
+  .icon-btn{
+    width:36px; height:36px; border-radius:50%; border:1px solid var(--line); background:#fff; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; font-size:.95rem; transition:background .12s ease, transform .12s ease;
+  }
+  .icon-btn:hover{ background:var(--green-050); transform:translateY(-1px); }
+  .icon-btn.danger:hover{ background:#FADCD9; }
+  .empty{ color:var(--ink-soft); text-align:center; padding:48px 20px; background:#fff; border:1px dashed var(--line); border-radius:var(--radius); }
+  .lock-banner{ background:#FFF5F3; border:1px solid #f0c9c2; color:#8f2c22; border-radius:var(--radius); padding:16px 20px; margin-bottom:22px; font-weight:600; font-size:.92rem; }
+
+  /* ---------- Pill tabs (student portal + teacher fill) ---------- */
+  .portal-search{ margin-bottom:18px; max-width:420px; }
+  .tabs{
+    display:flex; gap:4px; overflow-x:auto; margin-bottom:24px; padding:5px;
+    background:var(--cream-dark); border-radius:999px; width:fit-content; max-width:100%;
+  }
+  .tab{
+    background:none; border:none; padding:10px 18px; font-family:var(--font-body); font-weight:600; font-size:.86rem;
+    color:var(--ink-soft); cursor:pointer; white-space:nowrap; border-radius:999px; transition:background .15s ease, color .15s ease;
+  }
+  .tab.active{ color:#fff; background:var(--green-900); box-shadow:0 3px 10px rgba(15,61,46,.3); }
+  .tab:hover:not(.active){ background:rgba(255,255,255,.7); color:var(--green-900); }
+
+  .table-wrap{ overflow-x:auto; background:#fff; border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:20px; }
+  .results-table{ border-collapse:collapse; width:100%; min-width:480px; font-size:.87rem; }
+  .results-table th{ background:var(--green-900); color:#fff; text-align:left; padding:11px 15px; font-weight:600; white-space:nowrap; }
+  .results-table td{ padding:10px 15px; border-bottom:1px solid var(--line); font-family:var(--font-mono); }
+  .results-table td.name-cell{ font-family:var(--font-body); font-weight:600; }
+  .results-table tbody tr{ transition:background .12s ease; }
+  .results-table tbody tr:nth-child(even){ background:var(--cream); }
+  .results-table tbody tr:hover{ background:var(--green-050); }
+  .score-input{ width:92px !important; }
+
+  .top-bottom{ display:grid; grid-template-columns:1fr 1fr; gap:26px; margin-bottom:24px; }
+  @media (max-width:700px){ .top-bottom{ grid-template-columns:1fr; } }
+  .tb-title{ font-size:1rem; margin-bottom:11px; }
+  .tb-title.good{ color:var(--green-700); }
+  .tb-title.bad{ color:var(--brick); }
+  .chip-list{ display:flex; flex-wrap:wrap; gap:8px; }
+  .chip{ font-family:var(--font-mono); font-size:.78rem; padding:6px 12px; border-radius:999px; font-weight:600; }
+  .chip.good{ background:var(--green-050); color:var(--green-900); }
+  .chip.bad{ background:#FADCD9; color:#8f2c22; }
+
+  .stats-title{ margin-top:34px; }
+  .rank-list{ list-style:none; padding:0; margin:0 0 22px; display:grid; gap:9px; }
+  .rank-list li{ display:flex; align-items:center; gap:12px; background:#fff; border:1px solid var(--line); border-radius:11px; padding:11px 15px; box-shadow:var(--shadow); }
+  .rank-badge{ width:28px; height:28px; border-radius:50%; background:var(--gold); color:#fff; font-family:var(--font-mono); font-weight:700; font-size:.78rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .rank-value{ margin-left:auto; font-family:var(--font-mono); color:var(--ink-soft); }
+  .subject-rank{ margin-bottom:20px; }
+  .subject-rank h4{ font-size:.92rem; color:var(--green-900); margin-bottom:9px; }
+  .rank-list.compact li{ padding:7px 14px; box-shadow:none; }
+
+  /* ---------- Modal ---------- */
+  .modal-overlay{ position:fixed; inset:0; background:rgba(15,41,34,.6); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; padding:20px; z-index:100; animation:fadeIn .2s ease; }
+  @keyframes fadeIn{ from{ opacity:0; } to{ opacity:1; } }
+  .modal-box{ background:var(--cream); border-radius:20px; padding:30px; max-width:420px; width:100%; box-shadow:0 24px 70px rgba(0,0,0,.35); text-align:center; }
+  .modal-box input{ margin-bottom:14px; }
+  .modal-actions{ display:flex; gap:10px; justify-content:center; margin-top:12px; }
+  .modal-error{ color:var(--brick); font-size:.84rem; margin:-6px 0 12px; }
+  .stamp-confirm{ display:flex; justify-content:center; margin-bottom:12px; }
+  .stamp-confirm .stamp{ width:90px; height:90px; animation:stampDrop .4s cubic-bezier(.2,1.4,.4,1); }
+  @keyframes stampDrop{ from{ transform:scale(2) rotate(-14deg); opacity:0; } to{ transform:scale(1) rotate(-8deg); opacity:1; } }
+
+  /* ---------- Admin ---------- */
+  .center-card{ max-width:380px; margin:44px auto; background:#fff; border:1px solid var(--line); border-radius:22px; padding:36px 28px; text-align:center; box-shadow:var(--shadow-lg); }
+  .center-card .stamp{ margin-bottom:18px; }
+  .admin-grid{ display:grid; grid-template-columns:1fr 1fr; gap:22px; }
+  @media (max-width:800px){ .admin-grid{ grid-template-columns:1fr; } }
+  .admin-card{ background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:24px; box-shadow:var(--shadow); }
+  .admin-card.danger-card{ border-color:#f0c9c2; }
+  .admin-card.danger-card p{ color:var(--ink-soft); font-size:.9rem; }
+  .inline-field{ display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+  .inline-field label{ width:100px; margin:0; font-weight:600; font-size:.82rem; flex-shrink:0; }
+  .archive-list{ margin-top:16px; border-top:1px dashed var(--line); padding-top:14px; }
+  .archive-list h4{ margin:0 0 10px; font-family:var(--font-body); font-size:.82rem; color:var(--ink-soft); text-transform:uppercase; letter-spacing:1px; }
+  .archive-row{ display:flex; justify-content:space-between; padding:9px 0; font-size:.86rem; color:var(--ink-soft); border-bottom:1px solid var(--line); }
+  .archive-row:last-child{ border-bottom:none; }
+
+  /* ---------- Toast ---------- */
+  .toast{
+    position:fixed; bottom:26px; left:50%; transform:translate(-50%,20px); background:var(--green-900); color:#fff;
+    padding:13px 24px; border-radius:999px; font-size:.88rem; font-weight:500; opacity:0; transition:all .3s ease;
+    z-index:200; box-shadow:0 10px 30px rgba(0,0,0,.25); max-width:90vw; text-align:center;
+  }
+  .toast.show{ opacity:1; transform:translate(-50%,0); }
+  .toast-error{ background:var(--brick); }
+
+  /* ---------- Print header (hidden on screen, shown when printing) ---------- */
+  .print-header{ display:none; }
+  .toolbar-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+
+  /* ---------- Print styles ---------- */
+  @media print{
+    @page{ size: landscape; margin: 10mm; }
+    * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+    body{ background:#fff !important; }
+    #app{ max-width:100% !important; padding:0 !important; animation:none !important; }
+    .site-header, .hero, .roles, .footnote{ display:none !important; }
+    .bar{ position:static !important; background:#fff !important; box-shadow:none !important; backdrop-filter:none !important; border-bottom:2px solid var(--green-900); margin:0 0 18px; }
+    .bar .back, .bar .icon-btn{ display:none !important; }
+    .tabs, .portal-search, .student-actions, .dash-toolbar, .modal-overlay, .toast{ display:none !important; }
+    .panel-toolbar .btn{ display:none !important; }
+    .print-header{ display:block !important; margin-bottom:18px; }
+    .print-header h2{ margin-bottom:4px; }
+    .print-header p{ color:var(--ink-soft); font-size:.85rem; margin:0; }
+    /* Jedwali lisikatike kwa scroll — lionekane lote kwenye ukurasa */
+    .table-wrap{ box-shadow:none !important; border:1px solid #000 !important; overflow:visible !important; width:100% !important; }
+    .results-table{ font-size:10px; width:100% !important; min-width:0 !important; table-layout:auto; }
+    .results-table th, .results-table td{ padding:5px 6px; white-space:normal; word-break:break-word; }
+    .results-table th{ background:var(--green-900) !important; color:#fff !important; }
+    .results-table tbody tr{ break-inside:avoid-page; }
+    .top-bottom, .rank-list li, .subject-rank, .stats-title{ break-inside:avoid-page; }
+    .chip, .tag{ border:1px solid rgba(0,0,0,.25); }
+  }
+
+  /* ---------- Stamp SVG ---------- */
+  .stamp-ring-outer{ fill:none; stroke:var(--gold); stroke-width:3; stroke-dasharray:2 7; }
+  .stamp-ring-inner{ fill:none; stroke:var(--gold); stroke-width:2; }
+  .stamp-text{ font-family:var(--font-mono); font-size:11px; fill:var(--gold-dark); letter-spacing:2px; }
+  .stamp-star{ font-size:32px; fill:var(--gold); }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// =====================================================================
+// CONSTANTS
+// =====================================================================
+const SCHOOLS = ['SAMAMBA SS', 'UTAHO SS', 'MIANDI SS'];
+const SUBJECTS = ['KISWAHILI', 'HISTORIA YA TANZANIA NA MAADILI', 'BUSINESS STUDIES', 'ENGLISH LANGUAGE'];
+const STORAGE_KEY = 'kitutu_matokeo_v2';
+const FORM_LABEL = 'MATOKEO YA KIDATO CHA PILI';
+const SEX_OPTIONS = ['Kiume', 'Kike'];
+// Kugawa jina moja refu kuwa sehemu tatu (kwa data za zamani zisizo na majina matatu tofauti).
+function splitFullName(fullName){
+  const parts = String(fullName || '').trim().split(/\s+/).filter(Boolean);
+  if(parts.length===0) return { firstName:'', middleName:'', lastName:'' };
+  if(parts.length===1) return { firstName:parts[0], middleName:'', lastName:'' };
+  if(parts.length===2) return { firstName:parts[0], middleName:'', lastName:parts[1] };
+  return { firstName:parts[0], middleName:parts.slice(1,-1).join(' '), lastName:parts[parts.length-1] };
+}
+function buildFullName(first, middle, last){
+  return [first, middle, last].map(p=> String(p||'').trim()).filter(Boolean).join(' ');
+}
+function sexLabel(sex){ return sex || '—'; }
+
+// =====================================================================
+// GRADING HELPERS
+// =====================================================================
+function gradeLetter(score){
+  if(score>=75) return 'A';
+  if(score>=65) return 'B';
+  if(score>=45) return 'C';
+  if(score>=29) return 'D';
+  return 'F';
+}
+function commentFor(avg){
+  if(avg>=75) return 'VIZURI SANA';
+  if(avg>=65) return 'VIZURI';
+  if(avg>=45) return 'WASTANI';
+  if(avg>=29) return 'DHAIFU';
+  return 'MBAYA SANA';
+}
+function gradeClass(g){ return g==='-' ? 'grade-none' : 'grade-'+g; }
+// Mfumo wa NECTA: 1 ni bora zaidi (A), 5 ni mbaya zaidi (F) — GPA ndogo ni bora.
+function gradePoint(g){
+  switch(g){
+    case 'A': return 1;
+    case 'B': return 2;
+    case 'C': return 3;
+    case 'D': return 4;
+    default: return 5; // F
+  }
+}
+
+// A subject only "counts" once a teacher has actually typed a mark for it.
+function hasScore(s, subj){
+  const v = s.scores[subj];
+  return v !== undefined && v !== null && v !== '';
+}
+function enteredSubjects(s){ return SUBJECTS.filter(subj=> hasScore(s, subj)); }
+function totalOf(s){ return enteredSubjects(s).reduce((sum,subj)=> sum + Number(s.scores[subj]), 0); }
+function averageOf(s){ const es = enteredSubjects(s); return es.length ? totalOf(s) / es.length : 0; }
+function overallGrade(s){ return enteredSubjects(s).length ? gradeLetter(averageOf(s)) : '-'; }
+function commentOf(s){ return enteredSubjects(s).length ? commentFor(averageOf(s)) : 'BADO HAJAJAZWA'; }
+
+function studentsOf(school){ return state.students.filter(s=> s.school===school); }
+function filterStudents(list, query){
+  if(!query || !query.trim()) return list;
+  const q = query.toLowerCase();
+  return list.filter(s=> s.name.toLowerCase().includes(q) || s.examNumber.toLowerCase().includes(q));
+}
+function schoolId(sc){ return sc.replace(/\s+/g,'_'); }
+
+// =====================================================================
+// STATE (persisted to localStorage — kila alama anayojaza mwalimu
+// inahifadhiwa papo hapo, hivyo hazipotei hata kama ukurasa umefungwa)
+// =====================================================================
+function defaultState(){
+  const teacherPasswords = {};
+  const teacherPasswordChanged = {};
+  SCHOOLS.forEach(s=> { teacherPasswords[s] = '1234'; teacherPasswordChanged[s] = false; });
+  return { students: [], teacherPasswords, teacherPasswordChanged, adminPassword: 'admin123', archives: {}, locked: false, currentPeriodLabel: '' };
+}
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      const merged = Object.assign(defaultState(), parsed);
+      merged.students = (merged.students || []).map(s=> ({ ...s, scores: s.scores || {} }));
+      // Uhamiaji: data za zamani hazina teacherPasswordChanged — tumia password ya sasa kubashiri.
+      if(!parsed.teacherPasswordChanged){
+        merged.teacherPasswordChanged = {};
+        SCHOOLS.forEach(sc=> merged.teacherPasswordChanged[sc] = (merged.teacherPasswords[sc] !== '1234'));
+      }
+      if(typeof parsed.locked !== 'boolean') merged.locked = false;
+      return merged;
+    }
+  }catch(e){ /* endelea na data chaguo-msingi */ }
+  return defaultState();
+}
+function saveState(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){
+    toast('Onyo: hifadhi ya kivinjari imeshindwa kuhifadhi data.', 'error');
+  }
+}
+let state = loadState();
+
+// =====================================================================
+// SMALL UTILITIES
+// =====================================================================
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, c=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+// Salama kuweka ndani ya onclick='...' wakati maandishi (km. jina la archive) yanaweza kuwa na alama za nukuu.
+function jsAttr(str){
+  return String(str).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+}
+function toast(msg, type){
+  const t = document.createElement('div');
+  t.className = 'toast' + (type==='error' ? ' toast-error' : '');
+  t.textContent = msg;
+  document.body.appendChild(t);
+  requestAnimationFrame(()=> t.classList.add('show'));
+  setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=> t.remove(), 300); }, 2800);
+}
+function openModal(innerHtml, mandatory){
+  closeModal();
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = 'modalOverlay';
+  overlay.innerHTML = `<div class="modal-box">${innerHtml}</div>`;
+  if(!mandatory){
+    overlay.addEventListener('click', (e)=>{ if(e.target===overlay) closeModal(); });
+    document.addEventListener('keydown', escCloseModal);
+  }
+  document.body.appendChild(overlay);
+  const firstInput = overlay.querySelector('input');
+  if(firstInput) firstInput.focus();
+}
+function closeModal(){
+  const el = document.getElementById('modalOverlay');
+  if(el) el.remove();
+  document.removeEventListener('keydown', escCloseModal);
+}
+function escCloseModal(e){ if(e.key==='Escape') closeModal(); }
+
+// Circular "official seal" stamp — the app's signature visual element
+function stampSVG(idSuffix, size){
+  const id = 'circlePath_' + idSuffix;
+  return `
+  <svg class="stamp" width="${size}" height="${size}" viewBox="0 0 200 200" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true">
+    <defs>
+      <path id="${id}" d="M 100,100 m -78,0 a 78,78 0 1,1 156,0 a 78,78 0 1,1 -156,0" />
+    </defs>
+    <circle cx="100" cy="100" r="94" class="stamp-ring-outer"/>
+    <circle cx="100" cy="100" r="62" class="stamp-ring-inner"/>
+    <text class="stamp-text">
+      <textPath href="#${id}" xlink:href="#${id}" startOffset="2%">KATA YA KITUNTU • MATOKEO RASMI •</textPath>
+    </text>
+    <text x="100" y="112" text-anchor="middle" class="stamp-star">★</text>
+  </svg>`;
+}
+
+// =====================================================================
+// CSV DOWNLOAD
+// =====================================================================
+function csvEscape(v){
+  v = String(v);
+  if(v.includes(',') || v.includes('"') || v.includes('\n')) return '"' + v.replace(/"/g,'""') + '"';
+  return v;
+}
+// Parser rahisi wa CSV — inashughulikia sehemu zenye alama za nukuu na koma ndani.
+function parseCsv(text, delimiter){
+  delimiter = delimiter || ',';
+  text = text.replace(/^\uFEFF/, '');
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+  for(let i=0; i<text.length; i++){
+    const c = text[i];
+    if(inQuotes){
+      if(c === '"'){
+        if(text[i+1] === '"'){ field += '"'; i++; }
+        else inQuotes = false;
+      } else field += c;
+    } else {
+      if(c === '"') inQuotes = true;
+      else if(c === delimiter){ row.push(field); field = ''; }
+      else if(c === '\n' || c === '\r'){
+        if(c === '\r' && text[i+1] === '\n') i++;
+        row.push(field); field = '';
+        rows.push(row); row = [];
+      } else field += c;
+    }
+  }
+  if(field !== '' || row.length){ row.push(field); rows.push(row); }
+  return rows.filter(r=> r.some(cell=> String(cell).trim() !== ''));
+}
+// Excel huwa inatumia ';' badala ya ',' kwenye baadhi ya mipangilio ya lugha/eneo — tambua kiotomatiki.
+function detectCsvDelimiter(text){
+  const firstLine = (text.split(/\r\n|\n|\r/)[0] || '');
+  const commaCount = (firstLine.match(/,/g) || []).length;
+  const semiCount = (firstLine.match(/;/g) || []).length;
+  return semiCount > commaCount ? ';' : ',';
+}
+// Baadhi ya Excel (hasa mipangilio isiyo ya Kiingereza-Marekani) huongeza mstari wa siri
+// "sep=;" mwanzoni mwa faili ili kuonyesha alama gani inatumika — hii ikiwepo, tuiondoe
+// kabla ya kusoma vichwa vya safu, na tutumie alama hiyo moja kwa moja.
+function stripExcelSepDirective(text){
+  const m = text.match(/^\uFEFF?sep=(.)\r?\n/i);
+  if(m) return { text: text.slice(m[0].length), forcedDelimiter: m[1] };
+  return { text, forcedDelimiter: null };
+}
+// Safisha kichwa cha safu: ondoa BOM/herufi zisizoonekana, nukuu, na nafasi za ziada.
+function normalizeHeaderCell(h){
+  return String(h == null ? '' : h)
+    .replace(/[\uFEFF\u200B\u00A0]/g, ' ')
+    .replace(/^["']+|["']+$/g, '')
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, ' ');
+}
+function printCurrentView(){
+  window.print();
+}
+function printHeaderHtml(subtitle){
+  const date = new Date().toLocaleDateString('sw-TZ', { year:'numeric', month:'long', day:'numeric' });
+  const period = state.currentPeriodLabel ? ` — ${state.currentPeriodLabel}` : '';
+  return `
+    <div class="print-header">
+      <h2>${FORM_LABEL} — KATA YA KITUNTU</h2>
+      <p>${escapeHtml(subtitle)}${escapeHtml(period)} · Limechapishwa: ${date}</p>
+    </div>
+  `;
+}
+// Vichwa vinavyowekwa juu ya kila CSV ya matokeo: FORM_LABEL, somo/kipengele, na mwezi/muhula wa sasa.
+function csvTitleRows(subjectLabel, periodLabel){
+  const rows = [[FORM_LABEL], [subjectLabel]];
+  if(periodLabel) rows.push([periodLabel]);
+  rows.push([]);
+  return rows;
+}
+function downloadCsv(filename, rows){
+  const csv = rows.map(r=> r.map(csvEscape).join(',')).join('\n');
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename + '.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function downloadOverallCsv(){
+  const sorted = getPortalFilteredStudents().slice().sort((a,b)=> averageOf(b)-averageOf(a));
+  const schoolLabel = portalSchoolFilter || 'SHULE ZOTE (KATA YA KITUNTU)';
+  const rows = [
+    ...csvTitleRows(`MASOMO YOTE — ${schoolLabel}`, state.currentPeriodLabel),
+    ['Nafasi','Jina','Namba ya Mtihani','Shule', ...SUBJECTS, 'Jumla','Wastani','Ukamilifu','Daraja','Maoni']
+  ];
+  sorted.forEach((s,i)=>{
+    rows.push([i+1, s.name, s.examNumber, s.school,
+      ...SUBJECTS.map(subj=> hasScore(s,subj) ? s.scores[subj] : ''),
+      totalOf(s), averageOf(s).toFixed(2), `${enteredSubjects(s).length}/${SUBJECTS.length}`, overallGrade(s), commentOf(s)]);
+  });
+  downloadCsv(`matokeo_yote${portalSchoolFilter ? '_'+schoolId(portalSchoolFilter) : ''}`, rows);
+}
+function downloadSubjectCsv(subj){
+  const sorted = getPortalFilteredStudents().filter(s=> hasScore(s,subj)).slice().sort((a,b)=> (b.scores[subj])-(a.scores[subj]));
+  const schoolLabel = portalSchoolFilter || 'SHULE ZOTE TATU (KATA YA KITUNTU)';
+  const rows = [
+    ...csvTitleRows(`${subj} — ${schoolLabel}`, state.currentPeriodLabel),
+    ['Nafasi','Jina','Namba ya Mtihani','Shule', subj, 'Daraja']
+  ];
+  sorted.forEach((s,i)=> rows.push([i+1, s.name, s.examNumber, s.school, s.scores[subj], gradeLetter(s.scores[subj])]));
+  downloadCsv(`${subj.replace(/\s+/g,'_')}${portalSchoolFilter ? '_'+schoolId(portalSchoolFilter) : '_shule_zote'}`, rows);
+}
+function downloadStatsCsv(){
+  const { dist, overallAvgBySchool, overallGpaBySchool, rankOverall, subjectSchoolStats } = computeStats();
+  const rows = [...csvTitleRows('TAKWIMU ZA KATA', state.currentPeriodLabel)];
+  rows.push(['IDADI YA MADARAJA (A - F)']);
+  rows.push(['Somo','A','B','C','D','F']);
+  Object.keys(dist).forEach(k=> rows.push([k, dist[k].A, dist[k].B, dist[k].C, dist[k].D, dist[k].F]));
+  rows.push([]);
+  rows.push(['NAFASI YA SHULE (KWA GPA)']);
+  rows.push(['Nafasi','Shule','GPA','Wastani wa Alama']);
+  rankOverall.forEach((sc,i)=> rows.push([i+1, sc, overallGpaBySchool[sc].toFixed(2), overallAvgBySchool[sc].toFixed(2)]));
+  SUBJECTS.forEach(subj=>{
+    rows.push([]);
+    rows.push([`NAFASI YA SHULE — ${subj}`]);
+    rows.push(['Nafasi','Shule','Waliofanya','A','B','C','D','F','GPA']);
+    subjectSchoolStats[subj].forEach((row,i)=> rows.push([i+1, row.school, row.sat, row.counts.A, row.counts.B, row.counts.C, row.counts.D, row.counts.F, row.gpa.toFixed(2)]));
+  });
+  downloadCsv('takwimu_za_kata', rows);
+}
+function downloadArchiveCsv(label, school){
+  let list = state.archives[label] || [];
+  if(school) list = list.filter(s=> s.school===school);
+  const sorted = list.slice().sort((a,b)=> averageOf(b)-averageOf(a));
+  const schoolLabel = school || 'SHULE ZOTE (KATA YA KITUNTU)';
+  const rows = [
+    ...csvTitleRows(`MASOMO YOTE — ${schoolLabel}`, label),
+    ['Nafasi','Jina','Namba ya Mtihani','Shule', ...SUBJECTS, 'Jumla','Wastani','Ukamilifu','Daraja','Maoni']
+  ];
+  sorted.forEach((s,i)=>{
+    rows.push([i+1, s.name, s.examNumber, s.school,
+      ...SUBJECTS.map(subj=> hasScore(s,subj) ? s.scores[subj] : ''),
+      totalOf(s), averageOf(s).toFixed(2), `${enteredSubjects(s).length}/${SUBJECTS.length}`, overallGrade(s), commentOf(s)]);
+  });
+  downloadCsv(`${label.replace(/\s+/g,'_')}${school ? '_'+schoolId(school) : '_yote'}`, rows);
+}
+// Jedwali la matokeo linaloweza kutumika kwa data yoyote ya wanafunzi (live au archive)
+function resultsTableHtml(list){
+  const sorted = list.slice().sort((a,b)=> averageOf(b)-averageOf(a));
+  return `
+    <div class="table-wrap">
+      <table class="results-table">
+        <thead><tr>
+          <th>Nafasi</th><th>Jina</th><th>Namba</th><th>Shule</th>
+          ${SUBJECTS.map(s=> `<th>${s}</th>`).join('')}
+          <th>Jumla</th><th>Wastani</th><th>Ukamilifu</th><th>Daraja</th><th>Maoni</th>
+        </tr></thead>
+        <tbody>
+          ${sorted.map((s,i)=> `
+            <tr>
+              <td>${i+1}</td>
+              <td class="name-cell">${escapeHtml(s.name)}</td>
+              <td>${escapeHtml(s.examNumber)}</td>
+              <td>${escapeHtml(s.school)}</td>
+              ${SUBJECTS.map(subj=> `<td>${hasScore(s,subj) ? s.scores[subj] : '—'}</td>`).join('')}
+              <td>${totalOf(s)}</td>
+              <td>${averageOf(s).toFixed(1)}</td>
+              <td>${enteredSubjects(s).length}/${SUBJECTS.length}</td>
+              <td><span class="tag ${gradeClass(overallGrade(s))}">${overallGrade(s)}</span></td>
+              <td>${commentOf(s)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+// =====================================================================
+// HOME VIEW
+// =====================================================================
+const app = document.getElementById('app');
+
+function showHome(){
+  app.innerHTML = `
+    <header class="site-header">
+      <div class="brand">${stampSVG('hdr',38)}<span>MATOKEO YA KITUNTU</span></div>
+    </header>
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Kata ya Kitutu · Sekondari Tatu</p>
+        <h1>Matokeo yaliyo wazi,<br>yenye haki, kwa kila<br><em>mwanafunzi</em>.</h1>
+        <p class="lede">Mfumo mmoja unaounganisha Samamba, Utaho na Miandi Sekondari — walimu wanaandikisha majina kisha wanajaza alama, wanafunzi wanaona nafasi zao, na uongozi unafuatilia matokeo ya kata nzima.</p>
+      </div>
+      <div class="hero-art">${stampSVG('hero',160)}</div>
+    </section>
+    <section class="roles">
+      <button class="role-tab role-teacher" onclick="showTeacherSchools()">
+        <span class="role-mark">m</span>
+        <h2>Mwalimu</h2>
+        <p>Andikisha wanafunzi kisha jaza alama zao kwa kila somo.</p>
+        <span class="role-cta">Ingia kama Mwalimu →</span>
+      </button>
+      <button class="role-tab role-student" onclick="showStudentPortal()">
+        <span class="role-mark">s</span>
+        <h2>Mwanafunzi</h2>
+        <p>Tazama matokeo, nafasi yako na takwimu za kata.</p>
+        <span class="role-cta">Tazama Matokeo →</span>
+      </button>
+      <button class="role-tab role-admin" onclick="showAdminLogin()">
+        <span class="role-mark">a</span>
+        <h2>Admin</h2>
+        <p>Simamia password na hifadhi matokeo kwa mwezi.</p>
+        <span class="role-cta">Fungua Dashibodi →</span>
+      </button>
+    </section>
+    <p class="footnote">Matokeo yanayojazwa na walimu yanahifadhiwa moja kwa moja kwenye kivinjari hiki.</p>
+  `;
+}
+
+// =====================================================================
+// TEACHER: SCHOOL LIST + LOGIN
+// =====================================================================
+function showTeacherSchools(){
+  app.innerHTML = `
+    <header class="bar">
+      <button class="back" onclick="showHome()">← Nyuma</button>
+      <h1>Chagua Shule</h1>
+    </header>
+    <div class="school-list">
+      ${SCHOOLS.map(sc=>`
+        <button class="school-card" onclick="promptTeacherLogin('${sc}')">
+          <span class="school-mark">${sc.slice(0,2)}</span>
+          <span class="school-name">${sc}</span>
+          <span class="chev">→</span>
+        </button>
+      `).join('')}
+    </div>
+  `;
+}
+function promptTeacherLogin(school){
+  openModal(`
+    <h2>Password ya ${escapeHtml(school)}</h2>
+    <input type="password" id="teacherPassInput" placeholder="Password">
+    <p class="modal-error" id="teacherPassErr" hidden>Password si sahihi.</p>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeModal()">Ghairi</button>
+      <button class="btn primary" onclick="submitTeacherLogin('${school}')">Ingia</button>
+    </div>
+  `);
+  document.getElementById('teacherPassInput').addEventListener('keydown', e=>{ if(e.key==='Enter') submitTeacherLogin(school); });
+}
+function submitTeacherLogin(school){
+  const val = document.getElementById('teacherPassInput').value;
+  if(val === state.teacherPasswords[school]){
+    closeModal();
+    if(!state.teacherPasswordChanged[school]){
+      promptForcePasswordChange(school);
+    } else {
+      showTeacherDashboard(school);
+    }
+  } else {
+    document.getElementById('teacherPassErr').hidden = false;
+  }
+}
+// Kulazimisha kubadili password mara ya kwanza mwalimu anapoingia (au baada ya Admin kuiweka upya).
+function promptForcePasswordChange(school){
+  openModal(`
+    <h2>Karibu — Weka Password Mpya</h2>
+    <p style="color:var(--ink-soft); font-size:.88rem; margin:-6px 0 14px;">Hii ni mara yako ya kwanza kuingia (au password yako imewekwa upya na Admin). Weka password mpya ya siri kabla ya kuendelea.</p>
+    <input type="password" id="forceNewPass" placeholder="Password Mpya (angalau herufi 4)">
+    <input type="password" id="forceNewPass2" placeholder="Rudia Password Mpya">
+    <p class="modal-error" id="forcePassErr" hidden>Password hazifanani au ni fupi mno (angalau herufi 4).</p>
+    <div class="modal-actions">
+      <button class="btn primary block" onclick="submitForcePasswordChange('${school}')">Endelea</button>
+    </div>
+  `, true);
+  document.getElementById('forceNewPass2').addEventListener('keydown', e=>{ if(e.key==='Enter') submitForcePasswordChange(school); });
+}
+function submitForcePasswordChange(school){
+  const p1 = document.getElementById('forceNewPass').value;
+  const p2 = document.getElementById('forceNewPass2').value;
+  if(p1.length < 4 || p1 !== p2){
+    document.getElementById('forcePassErr').hidden = false;
+    return;
+  }
+  state.teacherPasswords[school] = p1;
+  state.teacherPasswordChanged[school] = true;
+  saveState();
+  closeModal();
+  toast('Password imebadilishwa. Karibu!');
+  showTeacherDashboard(school);
+}
+
+// =====================================================================
+// TEACHER: DASHBOARD  (Tab A: Wanafunzi/roster · Tab B: Jaza Matokeo)
+// =====================================================================
+let currentTeacherSchool = null;
+let teacherSection = 'roster';
+let teacherFillSubjectIdx = 0;
+let teacherFillMode = 'single';
+
+function showTeacherDashboard(school){
+  currentTeacherSchool = school;
+  teacherSection = 'roster';
+  teacherFillSubjectIdx = 0;
+  teacherFillMode = 'single';
+  renderTeacherDashboard();
+}
+function renderTeacherDashboard(){
+  const school = currentTeacherSchool;
+  const count = studentsOf(school).length;
+  app.innerHTML = `
+    <header class="bar">
+      <button class="back" onclick="showTeacherSchools()">← Nyuma</button>
+      <h1>${escapeHtml(school)}</h1>
+      <button class="icon-btn" title="Badilisha Password" onclick="promptChangeTeacherPassword('${school}')">🔒</button>
+    </header>
+    ${state.locked ? `<div class="lock-banner">🔒 <strong>Alama zimefungwa na Admin.</strong> Huwezi kujaza, kuhariri, wala kuandikisha wanafunzi mpaka Admin akuruhusu tena.</div>` : ''}
+    <div class="tabs">
+      <button class="tab ${teacherSection==='roster'?'active':''}" onclick="setTeacherSection('roster')">Wanafunzi (${count})</button>
+      <button class="tab ${teacherSection==='fill'?'active':''}" onclick="setTeacherSection('fill')">Jaza Matokeo ${state.locked?'🔒':''}</button>
+      <button class="tab ${teacherSection==='archive'?'active':''}" onclick="setTeacherSection('archive')">Yaliyohifadhiwa</button>
+    </div>
+    <div id="teacherContent"></div>
+  `;
+  renderTeacherContent();
+}
+function setTeacherSection(sec){
+  teacherSection = sec;
+  renderTeacherDashboard();
+}
+function renderTeacherContent(){
+  const el = document.getElementById('teacherContent');
+  if(teacherSection==='roster') el.innerHTML = rosterHtml();
+  else if(teacherSection==='fill') el.innerHTML = fillResultsHtml();
+  else el.innerHTML = teacherArchiveListHtml();
+}
+
+// ---- Yaliyohifadhiwa (matokeo yaliyohifadhiwa na Admin kwa mwezi) ----
+function teacherArchiveListHtml(){
+  const school = currentTeacherSchool;
+  const labels = Object.keys(state.archives);
+  if(labels.length===0) return `<p class="empty">Hakuna matokeo yaliyohifadhiwa bado na Admin.</p>`;
+  return `
+    <div class="archive-list" style="margin-top:0; border-top:none; padding-top:0;">
+      ${labels.map(label=>{
+        const totalCount = state.archives[label].length;
+        const mineCount = state.archives[label].filter(s=> s.school===school).length;
+        return `
+        <div class="archive-row">
+          <div>
+            <strong>📁 ${escapeHtml(label)}</strong><br>
+            <span class="mono">${mineCount} wa ${escapeHtml(school)} · ${totalCount} kwa kata nzima</span>
+          </div>
+          <button class="btn ghost" onclick="showTeacherArchiveDetail('${jsAttr(label)}','mine')">Tazama →</button>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+}
+function showTeacherArchiveDetail(label, scope){
+  const school = currentTeacherSchool;
+  scope = scope || 'mine';
+  const all = state.archives[label] || [];
+  const list = scope==='all' ? all : all.filter(s=> s.school===school);
+  app.innerHTML = `
+    <header class="bar">
+      <button class="back" onclick="renderTeacherDashboard()">← Nyuma</button>
+      <h1>${escapeHtml(label)}</h1>
+    </header>
+    ${printHeaderHtml(label + (scope==='all' ? ' — Shule Zote za Kata' : ' — ' + school))}
+    <div class="tabs no-print">
+      <button class="tab ${scope==='mine'?'active':''}" onclick="showTeacherArchiveDetail('${jsAttr(label)}','mine')">Shule Yangu</button>
+      <button class="tab ${scope==='all'?'active':''}" onclick="showTeacherArchiveDetail('${jsAttr(label)}','all')">Shule Zote (Kata)</button>
+    </div>
+    <div class="panel-toolbar">
+      <span class="count-pill">${list.length} wanafunzi</span>
+      <div class="toolbar-actions">
+        <button class="btn ghost" onclick="printCurrentView()">🖨 Chapisha</button>
+        <button class="btn primary" ${list.length===0?'disabled':''} onclick="downloadArchiveCsv('${jsAttr(label)}'${scope==='mine' ? ",'"+jsAttr(school)+"'" : ''})">⬇ Pakua CSV</button>
+      </div>
+    </div>
+    ${list.length===0 ? `<p class="empty">Hakuna data kwenye hifadhi hii.</p>` : resultsTableHtml(list) + (scope==='all' ? statsBodyHtml(computeStats(list)) : gradeDistOnlyHtml(list))}
+  `;
+}
+
+// ---- Roster (majina kabla ya kujaza alama) ----
+function rosterHtml(){
+  const school = currentTeacherSchool;
+  const list = studentsOf(school).slice().sort((a,b)=> a.examNumber.localeCompare(b.examNumber, undefined, {numeric:true}));
+  const locked = state.locked;
+  return `
+    <div class="panel-toolbar">
+      <span class="count-pill">Orodha ya majina na namba</span>
+      <div class="toolbar-actions">
+        <button class="btn ghost" onclick="downloadRosterTemplate()">⬇ Pakua Orodha</button>
+        ${locked ? '' : `<button class="btn ghost" onclick="triggerUploadRoster()">⬆ Pakia Orodha</button>
+        <input type="file" id="uploadRosterInput" accept=".csv" style="display:none;" onchange="handleUploadRoster(this)">`}
+      </div>
+    </div>
+    <div class="dash-toolbar">
+      <span class="count-pill">${list.length} wanafunzi wameandikishwa</span>
+      ${locked ? '' : `<button class="btn primary" onclick="showRosterForm()">+ Andikisha Mwanafunzi</button>`}
+    </div>
+    ${list.length===0 ? `<p class="empty">Hakuna wanafunzi bado. ${locked ? 'Subiri Admin akuruhusu kuandikisha.' : 'Bonyeza "Andikisha Mwanafunzi", au pakua/jaza/pakia orodha hapo juu — ndipo utaweza kujaza alama.'}</p>` : `
+      <div class="student-list">
+        ${list.map(s=>{
+          const done = enteredSubjects(s).length;
+          const statusClass = done===SUBJECTS.length ? 'status-complete' : 'status-partial';
+          return `
+          <div class="student-row">
+            <div class="student-info">
+              <span class="mono">${escapeHtml(s.examNumber)}</span>
+              <strong>${escapeHtml(s.name)}</strong>
+              <span class="tag status-partial">${sexLabel(s.sex)}</span>
+              <span class="tag ${statusClass}">${done}/${SUBJECTS.length} masomo</span>
+            </div>
+            ${locked ? '' : `
+            <div class="student-actions">
+              <button class="icon-btn" title="Hariri" onclick="showRosterForm('${s.id}')">✎</button>
+              <button class="icon-btn danger" title="Futa" onclick="confirmDeleteStudent('${s.id}')">🗑</button>
+            </div>`}
+          </div>`;
+        }).join('')}
+      </div>
+    `}
+  `;
+}
+function downloadRosterTemplate(){
+  const school = currentTeacherSchool;
+  const list = studentsOf(school).slice().sort((a,b)=> a.examNumber.localeCompare(b.examNumber, undefined, {numeric:true}));
+  const rows = [['Namba ya Mtihani','Jina la Kwanza','Jina la Kati','Jina la Mwisho','Jinsia (Kiume/Kike)']];
+  list.forEach(s=>{
+    const parts = (s.firstName || s.lastName) ? s : { ...splitFullName(s.name) };
+    rows.push([s.examNumber, parts.firstName || '', parts.middleName || '', parts.lastName || '', s.sex || '']);
+  });
+  downloadCsv(`wanafunzi_${schoolId(school)}`, rows);
+}
+function triggerUploadRoster(){
+  if(state.locked){ toast('Imefungwa na Admin kwa sasa.', 'error'); return; }
+  const input = document.getElementById('uploadRosterInput');
+  if(input) input.click();
+}
+function handleUploadRoster(input){
+  const file = input.files[0];
+  if(!file) return;
+  if(state.locked){ toast('Imefungwa na Admin kwa sasa.', 'error'); input.value=''; return; }
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    try{
+      let text = String(e.target.result);
+      if(text.slice(0,2) === 'PK'){
+        toast('Faili hii ni Excel (.xlsx), si CSV. Fungua Excel → "Save As" → chagua "CSV (Comma delimited)", kisha upakie hiyo faili.', 'error');
+        input.value = '';
+        return;
+      }
+      text = text.replace(/^\uFEFF/, '');
+      const stripped = stripExcelSepDirective(text);
+      const delimiter = stripped.forcedDelimiter || detectCsvDelimiter(stripped.text);
+      const rows = parseCsv(stripped.text, delimiter);
+      if(rows.length < 2){ toast('Faili haina data ya kutosha.', 'error'); input.value=''; return; }
+      const header = rows[0].map(normalizeHeaderCell);
+      let examIdx = header.indexOf('NAMBA YA MTIHANI');
+      if(examIdx === -1) examIdx = header.findIndex(h=> h.includes('MTIHANI'));
+      let firstIdx = header.findIndex(h=> h.includes('KWANZA'));
+      let middleIdx = header.findIndex(h=> h.includes('KATI'));
+      let lastIdx = header.findIndex(h=> h.includes('MWISHO'));
+      let sexIdx = header.findIndex(h=> h.includes('JINSIA'));
+      let plainNameIdx = header.indexOf('JINA');
+      if(plainNameIdx === -1) plainNameIdx = header.findIndex(h=> h === 'JINA' || (h.includes('JINA') && !h.includes('KWANZA') && !h.includes('KATI') && !h.includes('MWISHO')));
+      const hasSplitNames = firstIdx !== -1 || lastIdx !== -1;
+      if(examIdx === -1 || (!hasSplitNames && plainNameIdx === -1)){
+        toast(`Orodha si sahihi — safu za majina na/au "Namba ya Mtihani" hazipo. Safu zilizopatikana: ${header.filter(Boolean).join(', ') || '(hakuna)'}. Tumia orodha uliyopakua bila kubadili majina ya safu.`, 'error');
+        input.value = '';
+        return;
+      }
+      const school = currentTeacherSchool;
+      let added = 0, updated = 0, skipped = 0;
+      for(let r=1; r<rows.length; r++){
+        const row = rows[r];
+        const examNumber = (row[examIdx] || '').trim();
+        let firstName, middleName, lastName;
+        if(hasSplitNames){
+          firstName = (row[firstIdx] || '').trim();
+          middleName = (row[middleIdx] || '').trim();
+          lastName = (row[lastIdx] || '').trim();
+        } else {
+          const split = splitFullName(row[plainNameIdx] || '');
+          firstName = split.firstName; middleName = split.middleName; lastName = split.lastName;
+        }
+        const rawSex = sexIdx !== -1 ? (row[sexIdx] || '').trim() : '';
+        const sex = SEX_OPTIONS.find(opt=> opt.toUpperCase() === rawSex.toUpperCase()) || '';
+        const name = buildFullName(firstName, middleName, lastName);
+        if(!examNumber || !firstName || !lastName){ skipped++; continue; }
+        const existing = state.students.find(s=> s.school===school && s.examNumber===examNumber);
+        if(existing){
+          existing.firstName = firstName; existing.middleName = middleName; existing.lastName = lastName;
+          existing.name = name;
+          if(sex) existing.sex = sex;
+          updated++;
+        } else {
+          state.students.push({ id: `${Date.now()}_${added}`, firstName, middleName, lastName, name, sex, examNumber, school, scores: {} });
+          added++;
+        }
+      }
+      saveState();
+      let msg = `Orodha imepakiwa: wanafunzi wapya ${added}, waliosasishwa ${updated}.`;
+      if(skipped) msg += ` Mistari ${skipped} haikuwa na jina/namba sahihi.`;
+      toast(msg, skipped ? 'error' : undefined);
+      renderTeacherContent();
+    }catch(err){
+      toast('Imeshindwa kusoma faili. Hakikisha ni CSV sahihi (tumia orodha uliyopakua).', 'error');
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+function showRosterForm(studentId){
+  const school = currentTeacherSchool;
+  const existing = studentId ? state.students.find(s=> s.id===studentId) : null;
+  const nameParts = existing
+    ? { firstName: existing.firstName ?? splitFullName(existing.name).firstName,
+        middleName: existing.middleName ?? splitFullName(existing.name).middleName,
+        lastName: existing.lastName ?? splitFullName(existing.name).lastName }
+    : { firstName:'', middleName:'', lastName:'' };
+  app.innerHTML = `
+    <header class="bar">
+      <button class="back" onclick="renderTeacherDashboard()">← Nyuma</button>
+      <h1>${existing ? 'Hariri Mwanafunzi' : 'Andikisha Mwanafunzi'}</h1>
+    </header>
+    <form class="form-card" onsubmit="return saveRosterStudent(event,'${existing ? existing.id : ''}')">
+      <label>Jina la Kwanza
+        <input type="text" name="firstName" required value="${escapeHtml(nameParts.firstName)}">
+      </label>
+      <label>Jina la Kati
+        <input type="text" name="middleName" value="${escapeHtml(nameParts.middleName)}">
+      </label>
+      <label>Jina la Mwisho
+        <input type="text" name="lastName" required value="${escapeHtml(nameParts.lastName)}">
+      </label>
+      <label>Jinsia
+        <select name="sex" required>
+          <option value="" ${!existing?.sex ? 'selected' : ''} disabled>-- Chagua Jinsia --</option>
+          ${SEX_OPTIONS.map(opt=> `<option value="${opt}" ${existing?.sex===opt ? 'selected' : ''}>${opt}</option>`).join('')}
+        </select>
+      </label>
+      <label>Namba ya Mtihani
+        <input type="text" name="examNumber" required placeholder="S0101/0001" value="${existing ? escapeHtml(existing.examNumber) : ''}">
+      </label>
+      <button type="submit" class="btn primary block">Hifadhi</button>
+    </form>
+  `;
+}
+function saveRosterStudent(event, id){
+  event.preventDefault();
+  if(state.locked){ toast('Alama/majina yamefungwa na Admin kwa sasa.', 'error'); return false; }
+  const fd = new FormData(event.target);
+  const firstName = (fd.get('firstName') || '').trim();
+  const middleName = (fd.get('middleName') || '').trim();
+  const lastName = (fd.get('lastName') || '').trim();
+  const sex = (fd.get('sex') || '').trim();
+  const examNumber = (fd.get('examNumber') || '').trim();
+  const name = buildFullName(firstName, middleName, lastName);
+  if(!firstName || !lastName || !sex || !examNumber){ toast('Jaza jina la kwanza, jina la mwisho, jinsia na namba ya mtihani.', 'error'); return false; }
+  if(id){
+    const s = state.students.find(x=> x.id===id);
+    if(s){ s.firstName=firstName; s.middleName=middleName; s.lastName=lastName; s.name=name; s.sex=sex; s.examNumber=examNumber; }
+  } else {
+    state.students.push({ id: String(Date.now()), firstName, middleName, lastName, name, sex, examNumber, school: currentTeacherSchool, scores: {} });
+  }
+  saveState();
+  toast('Mwanafunzi amehifadhiwa.');
+  renderTeacherDashboard();
+  return false;
+}
+function confirmDeleteStudent(id){
+  const student = state.students.find(s=> s.id===id);
+  if(!student) return;
+  openModal(`
+    <h2>Futa Mwanafunzi</h2>
+    <p>Una uhakika kufuta <strong>${escapeHtml(student.name)}</strong> pamoja na alama zake zote?</p>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeModal()">Ghairi</button>
+      <button class="btn danger" onclick="doDeleteStudent('${id}')">Futa</button>
+    </div>
+  `);
+}
+function doDeleteStudent(id){
+  if(state.locked){ toast('Imefungwa na Admin kwa sasa.', 'error'); return; }
+  state.students = state.students.filter(s=> s.id!==id);
+  saveState();
+  closeModal();
+  renderTeacherDashboard();
+}
+function promptChangeTeacherPassword(school){
+  openModal(`
+    <h2>Badilisha Password — ${escapeHtml(school)}</h2>
+    <input type="password" id="newTeacherPass" placeholder="Password Mpya">
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeModal()">Ghairi</button>
+      <button class="btn primary" onclick="doChangeTeacherPassword('${school}')">Hifadhi</button>
+    </div>
+  `);
+}
+function doChangeTeacherPassword(school){
+  const val = document.getElementById('newTeacherPass').value.trim();
+  if(!val) return;
+  state.teacherPasswords[school] = val;
+  state.teacherPasswordChanged[school] = true;
+  saveState();
+  closeModal();
+  toast('Password imebadilishwa.');
+}
+
+// ---- Jaza Matokeo: orodha ya majina yote, somo moja kwa wakati ----
+function fillResultsHtml(){
+  const school = currentTeacherSchool;
+  const list = studentsOf(school).slice().sort((a,b)=> a.examNumber.localeCompare(b.examNumber, undefined, {numeric:true}));
+  if(state.locked){
+    return `<p class="empty">🔒 Alama zimefungwa na Admin. Huwezi kujaza wala kuhariri alama kwa sasa. Subiri Admin akuruhusu tena.</p>`;
+  }
+  if(list.length===0){
+    return `<p class="empty">Hakuna wanafunzi bado. Nenda kwenye tab "Wanafunzi" kuandikisha majina kwanza.</p>`;
+  }
+  const toolbar = `
+    <div class="panel-toolbar">
+      <span class="count-pill">Template ya matokeo (masomo yote)</span>
+      <div class="toolbar-actions">
+        <button class="btn ghost" onclick="downloadFillTemplate()">⬇ Pakua Template</button>
+        <button class="btn ghost" onclick="triggerUploadTemplate()">⬆ Pakia Template Iliyojazwa</button>
+        <input type="file" id="uploadTemplateInput" accept=".csv" style="display:none;" onchange="handleUploadTemplate(this)">
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab ${teacherFillMode==='single'?'active':''}" onclick="setTeacherFillMode('single')">Somo Moja Moja</button>
+      <button class="tab ${teacherFillMode==='all'?'active':''}" onclick="setTeacherFillMode('all')">Masomo Yote Pamoja</button>
+    </div>
+  `;
+  if(teacherFillMode==='all'){
+    return toolbar + fillAllSubjectsHtml(list, school);
+  }
+  const subj = SUBJECTS[teacherFillSubjectIdx];
+  return toolbar + `
+    <div class="tabs">
+      ${SUBJECTS.map((s,i)=> `<button class="tab ${i===teacherFillSubjectIdx?'active':''}" onclick="setTeacherFillSubject(${i})">${escapeHtml(s)}</button>`).join('')}
+    </div>
+    <form id="fillForm" onsubmit="return saveFillResults(event,'${subj}')">
+      <p class="lede" style="margin-bottom:18px;">Jaza alama za <strong>${escapeHtml(subj)}</strong> kwa wanafunzi wote wa ${escapeHtml(school)} walioandikishwa. Bonyeza <strong>Enter</strong> baada ya kila alama ili ihifadhiwe papo hapo na kuhamia kwa mwanafunzi anayefuata. Waache wazi wale ambao bado hujawapa alama.</p>
+      <div class="table-wrap">
+        <table class="results-table">
+          <thead><tr><th>Jina</th><th>Namba</th><th>Alama (0–100)</th></tr></thead>
+          <tbody>
+            ${list.map(s=> `
+              <tr>
+                <td class="name-cell">${escapeHtml(s.name)}</td>
+                <td>${escapeHtml(s.examNumber)}</td>
+                <td><input class="score-input" type="number" min="0" max="100" data-student-id="${s.id}" value="${hasScore(s,subj) ? s.scores[subj] : ''}" onkeydown="handleFillKeydown(event,'${subj}')"></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+      <button type="submit" class="btn primary">Hifadhi Alama za ${escapeHtml(subj)}</button>
+    </form>
+  `;
+}
+// ---- Jedwali la kuingiza masomo YOTE kwa pamoja (template moja kwa wote) ----
+function fillAllSubjectsHtml(list, school){
+  return `
+    <form id="fillAllForm" onsubmit="return saveFillAllResults(event)">
+      <p class="lede" style="margin-bottom:18px;">Jaza alama za <strong>masomo yote manne</strong> kwa wanafunzi wote wa ${escapeHtml(school)} kwenye jedwali moja — sawa na template unayopakua. Bonyeza <strong>Enter</strong> baada ya kila alama ili ihifadhiwe papo hapo na kuhamia sehemu inayofuata. Waache wazi ambazo bado hujazipata.</p>
+      <div class="table-wrap">
+        <table class="results-table">
+          <thead><tr>
+            <th>Jina</th><th>Namba</th>
+            ${SUBJECTS.map(s=> `<th>${escapeHtml(s)}</th>`).join('')}
+          </tr></thead>
+          <tbody>
+            ${list.map(s=> `
+              <tr>
+                <td class="name-cell">${escapeHtml(s.name)}</td>
+                <td>${escapeHtml(s.examNumber)}</td>
+                ${SUBJECTS.map(subj=> `<td><input class="score-input" type="number" min="0" max="100" data-student-id="${s.id}" data-subject="${escapeHtml(subj)}" value="${hasScore(s,subj) ? s.scores[subj] : ''}" onkeydown="handleFillAllKeydown(event)"></td>`).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+      <button type="submit" class="btn primary">Hifadhi Matokeo Yote Mara Moja</button>
+    </form>
+  `;
+}
+function saveFillAllResults(event){
+  event.preventDefault();
+  if(state.locked){ toast('Alama zimefungwa na Admin kwa sasa.', 'error'); return false; }
+  const inputs = event.target.querySelectorAll('input[data-student-id]');
+  const touched = new Set();
+  let invalid = 0;
+  inputs.forEach(inp=>{
+    const raw = inp.value.trim();
+    if(raw==='') return;
+    const n = Number(raw);
+    if(isNaN(n) || n<0 || n>100){ invalid++; return; }
+    const id = inp.getAttribute('data-student-id');
+    const subj = inp.getAttribute('data-subject');
+    const student = state.students.find(s=> s.id===id);
+    if(student){ student.scores[subj] = n; touched.add(id); }
+  });
+  saveState();
+  let msg = `Matokeo ya masomo yote yamehifadhiwa kwa wanafunzi ${touched.size}.`;
+  if(invalid) msg += ` Alama ${invalid} hazikuwa sahihi (0–100) na hazikuhifadhiwa.`;
+  toast(msg, invalid ? 'error' : undefined);
+  renderTeacherContent();
+  return false;
+}
+// Enter kwenye jedwali la masomo yote: hifadhi hiyo alama, kisha uhamie sehemu inayofuata (kushoto→kulia, chini).
+function handleFillAllKeydown(e){
+  if(e.key !== 'Enter') return;
+  e.preventDefault();
+  if(state.locked){ toast('Alama zimefungwa na Admin kwa sasa.', 'error'); return; }
+  const input = e.target;
+  const raw = input.value.trim();
+  const id = input.getAttribute('data-student-id');
+  const subj = input.getAttribute('data-subject');
+  if(raw !== ''){
+    const n = Number(raw);
+    if(isNaN(n) || n<0 || n>100){
+      toast('Alama lazima iwe namba kati ya 0–100.', 'error');
+      input.focus();
+      input.select();
+      return;
+    }
+    const student = state.students.find(s=> s.id===id);
+    if(student){
+      student.scores[subj] = n;
+      saveState();
+      input.style.transition = 'background-color .15s ease';
+      input.style.backgroundColor = '#E4F3E9';
+      setTimeout(()=>{ input.style.backgroundColor = ''; }, 350);
+    }
+  }
+  const form = input.closest('form');
+  const allInputs = form ? Array.from(form.querySelectorAll('input.score-input')) : [];
+  const idx = allInputs.indexOf(input);
+  const next = allInputs[idx+1];
+  if(next){ next.focus(); next.select(); }
+  else { input.blur(); toast('Umefika mwisho wa jedwali.'); }
+}
+function setTeacherFillMode(mode){
+  teacherFillMode = mode;
+  renderTeacherContent();
+}
+function downloadFillTemplate(){
+  const school = currentTeacherSchool;
+  const list = studentsOf(school).slice().sort((a,b)=> a.examNumber.localeCompare(b.examNumber, undefined, {numeric:true}));
+  const rows = [['Namba ya Mtihani','Jina', ...SUBJECTS]];
+  list.forEach(s=> rows.push([s.examNumber, s.name, ...SUBJECTS.map(subj=> hasScore(s,subj) ? s.scores[subj] : '')]));
+  downloadCsv(`template_${schoolId(school)}`, rows);
+}
+function triggerUploadTemplate(){
+  if(state.locked){ toast('Alama zimefungwa na Admin kwa sasa.', 'error'); return; }
+  const input = document.getElementById('uploadTemplateInput');
+  if(input) input.click();
+}
+function handleUploadTemplate(input){
+  const file = input.files[0];
+  if(!file) return;
+  if(state.locked){ toast('Alama zimefungwa na Admin kwa sasa.', 'error'); input.value=''; return; }
+  const reader = new FileReader();
+  reader.onload = (e)=>{
+    try{
+      let text = String(e.target.result);
+      // Faili la Excel halisi (.xlsx) ni zip — likipakiwa kwa makosa, tuseme wazi badala ya kuchakura data mbovu.
+      if(text.slice(0,2) === 'PK'){
+        toast('Faili hii ni Excel (.xlsx), si CSV. Fungua Excel → "Save As" → chagua "CSV (Comma delimited)", kisha upakie hiyo faili.', 'error');
+        input.value = '';
+        return;
+      }
+      text = text.replace(/^\uFEFF/, '');
+      const stripped = stripExcelSepDirective(text);
+      const delimiter = stripped.forcedDelimiter || detectCsvDelimiter(stripped.text);
+      const rows = parseCsv(stripped.text, delimiter);
+      if(rows.length < 2){ toast('Faili haina data ya kutosha.', 'error'); input.value=''; return; }
+      const header = rows[0].map(normalizeHeaderCell);
+      let examIdx = header.indexOf('NAMBA YA MTIHANI');
+      if(examIdx === -1) examIdx = header.findIndex(h=> h.includes('MTIHANI'));
+      if(examIdx === -1){
+        toast(`Template si sahihi — safu ya "Namba ya Mtihani" haipo. Safu zilizopatikana: ${header.filter(Boolean).join(', ') || '(hakuna)'}. Tumia template uliyopakua bila kubadili majina ya safu.`, 'error');
+        input.value = '';
+        return;
+      }
+      const subjIdx = {};
+      let missingSubjects = [];
+      SUBJECTS.forEach(subj=>{
+        const subjNorm = normalizeHeaderCell(subj);
+        let idx = header.indexOf(subjNorm);
+        if(idx === -1) idx = header.findIndex(h=> h.includes(subjNorm));
+        subjIdx[subj] = idx;
+        if(idx===-1) missingSubjects.push(subj);
+      });
+      if(missingSubjects.length === SUBJECTS.length){
+        toast('Template si sahihi — safu za masomo hazipo. Tumia template uliyopakua bila kubadili vichwa vya safu.', 'error');
+        input.value = '';
+        return;
+      }
+      const school = currentTeacherSchool;
+      let updated = 0, notFound = 0, invalid = 0;
+      for(let r=1; r<rows.length; r++){
+        const row = rows[r];
+        const examNumber = (row[examIdx] || '').trim();
+        if(!examNumber) continue;
+        const student = state.students.find(s=> s.school===school && s.examNumber===examNumber);
+        if(!student){ notFound++; continue; }
+        let rowUpdated = false;
+        SUBJECTS.forEach(subj=>{
+          const idx = subjIdx[subj];
+          if(idx===-1 || idx===undefined) return;
+          const raw = (row[idx] || '').trim();
+          if(raw==='') return;
+          const n = Number(raw);
+          if(isNaN(n) || n<0 || n>100){ invalid++; return; }
+          student.scores[subj] = n;
+          rowUpdated = true;
+        });
+        if(rowUpdated) updated++;
+      }
+      saveState();
+      let msg = `Template imepakiwa: wanafunzi ${updated} wamesasishwa kwa mara moja.`;
+      if(notFound) msg += ` ${notFound} hawakupatikana kwenye orodha.`;
+      if(invalid) msg += ` Alama ${invalid} hazikuwa sahihi (0–100).`;
+      if(missingSubjects.length) msg += ` Safu zisizopatikana: ${missingSubjects.join(', ')}.`;
+      toast(msg, (notFound || invalid || missingSubjects.length) ? 'error' : undefined);
+      renderTeacherContent();
+    }catch(err){
+      toast('Imeshindwa kusoma faili. Hakikisha ni CSV sahihi (tumia template uliyopakua).', 'error');
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+function setTeacherFillSubject(i){
+  teacherFillSubjectIdx = i;
+  renderTeacherContent();
+}
+// Enter kwenye alama: hifadhi hiyo alama moja papo hapo, kisha uhamie kwa mwanafunzi anayefuata.
+function handleFillKeydown(e, subj){
+  if(e.key !== 'Enter') return;
+  e.preventDefault();
+  if(state.locked){ toast('Alama zimefungwa na Admin kwa sasa.', 'error'); return; }
+  const input = e.target;
+  const raw = input.value.trim();
+  const id = input.getAttribute('data-student-id');
+  if(raw !== ''){
+    const n = Number(raw);
+    if(isNaN(n) || n<0 || n>100){
+      toast('Alama lazima iwe namba kati ya 0–100.', 'error');
+      input.focus();
+      input.select();
+      return;
+    }
+    const student = state.students.find(s=> s.id===id);
+    if(student){
+      student.scores[subj] = n;
+      saveState();
+      input.style.transition = 'background-color .15s ease';
+      input.style.backgroundColor = '#E4F3E9';
+      setTimeout(()=>{ input.style.backgroundColor = ''; }, 350);
+    }
+  }
+  const currentRow = input.closest('tr');
+  const nextRow = currentRow ? currentRow.nextElementSibling : null;
+  if(nextRow){
+    const nextInput = nextRow.querySelector('input.score-input');
+    if(nextInput){ nextInput.focus(); nextInput.select(); }
+  } else {
+    input.blur();
+    toast('Umefika mwisho wa orodha ya wanafunzi.');
+  }
+}
+function saveFillResults(event, subj){
+  event.preventDefault();
+  if(state.locked){ toast('Alama zimefungwa na Admin kwa sasa.', 'error'); return false; }
+  const inputs = event.target.querySelectorAll('input[data-student-id]');
+  let updated = 0, invalid = 0;
+  inputs.forEach(inp=>{
+    const raw = inp.value.trim();
+    if(raw==='') return;
+    const n = Number(raw);
+    if(isNaN(n) || n<0 || n>100){ invalid++; return; }
+    const student = state.students.find(s=> s.id===inp.getAttribute('data-student-id'));
+    if(student){ student.scores[subj] = n; updated++; }
+  });
+  saveState();
+  if(invalid>0) toast(`Baadhi ya alama si sahihi (0–100) na hazikuhifadhiwa.`, 'error');
+  else toast(`Alama za ${subj} zimehifadhiwa kwa wanafunzi ${updated}.`);
+  renderTeacherContent();
+  return false;
+}
+
+// =====================================================================
+// STUDENT PORTAL
+// =====================================================================
+let portalTab = 0;
+let portalQuery = '';
+let portalSchoolFilter = '';
+
+function showStudentPortal(){
+  portalTab = 0;
+  portalQuery = '';
+  portalSchoolFilter = '';
+  renderPortal();
+}
+function renderPortal(){
+  const tabs = ['Matokeo Yote', ...SUBJECTS, 'Takwimu'];
+  app.innerHTML = `
+    <header class="bar">
+      <button class="back" onclick="showHome()">← Nyuma</button>
+      <h1>Matokeo ya Wanafunzi</h1>
+    </header>
+    <div class="portal-search" style="display:flex; gap:10px; flex-wrap:wrap;">
+      <input type="search" id="portalSearch" placeholder="Tafuta kwa jina au namba ya mtihani..." value="${escapeHtml(portalQuery)}" oninput="onPortalSearch(this.value)" style="flex:1; min-width:220px;">
+      <select id="portalSchoolFilter" onchange="onPortalSchoolFilter(this.value)" style="max-width:220px;">
+        <option value="">Shule Zote Tatu</option>
+        ${SCHOOLS.map(sc=> `<option value="${escapeHtml(sc)}" ${portalSchoolFilter===sc ? 'selected' : ''}>${escapeHtml(sc)}</option>`).join('')}
+      </select>
+    </div>
+    <div class="tabs" role="tablist">
+      ${tabs.map((t,i)=> `<button class="tab ${i===portalTab?'active':''}" onclick="setPortalTab(${i})">${escapeHtml(t)}</button>`).join('')}
+    </div>
+    <div class="tab-panel" id="tabPanel"></div>
+  `;
+  renderTabPanel();
+}
+function onPortalSearch(v){
+  portalQuery = v;
+  renderTabPanel();
+}
+function onPortalSchoolFilter(v){
+  portalSchoolFilter = v;
+  renderTabPanel();
+}
+function setPortalTab(i){
+  portalTab = i;
+  renderPortal();
+}
+function getPortalFilteredStudents(){
+  let list = filterStudents(state.students, portalQuery);
+  if(portalSchoolFilter) list = list.filter(s=> s.school===portalSchoolFilter);
+  return list;
+}
+function renderTabPanel(){
+  const panel = document.getElementById('tabPanel');
+  const filtered = getPortalFilteredStudents();
+  if(portalTab===0) panel.innerHTML = overallTabHtml(filtered);
+  else if(portalTab <= SUBJECTS.length) panel.innerHTML = subjectTabHtml(filtered, SUBJECTS[portalTab-1]);
+  else panel.innerHTML = statsTabHtml();
+}
+function topBottomHtml(sorted, valueOf){
+  const top = sorted.slice(0,20).map((s,i)=> ({ s, rank: i+1 }));
+  const bottomCount = Math.min(20, sorted.length);
+  const bottomStartRank = sorted.length - bottomCount + 1;
+  const bottom = sorted.slice(sorted.length-bottomCount).map((s,i)=> ({ s, rank: bottomStartRank+i })).reverse();
+  const rowHtml = (item, badgeStyle)=>{
+    const val = valueOf(item.s);
+    const grade = gradeLetter(val);
+    const comment = commentFor(val);
+    return `
+      <li style="align-items:flex-start;">
+        <span class="rank-badge"${badgeStyle ? ` style="${badgeStyle}"` : ''}>${item.rank}</span>
+        <div style="display:flex; flex-direction:column; gap:2px; flex:1; min-width:0;">
+          <span style="font-weight:600;">${escapeHtml(item.s.name)}</span>
+          <span style="font-size:.78rem; color:var(--ink-soft);">${escapeHtml(comment)}</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+          <span class="tag ${gradeClass(grade)}">${grade}</span>
+          <span class="rank-value" style="margin-left:0;">${val.toFixed(1)}</span>
+        </div>
+      </li>
+    `;
+  };
+  return `
+    <div class="top-bottom">
+      <div>
+        <h3 class="tb-title good">Wanafunzi 20 Bora</h3>
+        <ol class="rank-list compact">
+          ${top.map(item=> rowHtml(item)).join('')}
+        </ol>
+      </div>
+      <div>
+        <h3 class="tb-title bad">Wanafunzi 20 Dhaifu</h3>
+        <ol class="rank-list compact">
+          ${bottom.map(item=> rowHtml(item, 'background:var(--brick);')).join('')}
+        </ol>
+      </div>
+    </div>
+  `;
+}
+function overallTabHtml(list){
+  const withData = list.filter(s=> enteredSubjects(s).length>0);
+  const sorted = withData.slice().sort((a,b)=> averageOf(b)-averageOf(a));
+  if(list.length===0) return `<p class="empty">Hakuna wanafunzi bado${portalSchoolFilter ? ' wa '+escapeHtml(portalSchoolFilter) : ''}.</p>`;
+  return `
+    ${printHeaderHtml('Matokeo Yote — Masomo Yote Yameunganishwa' + (portalSchoolFilter ? ' — ' + portalSchoolFilter : ' — Shule Zote Tatu'))}
+    <div class="panel-toolbar">
+      <span class="count-pill">${list.length} wanafunzi${portalSchoolFilter ? ' — '+escapeHtml(portalSchoolFilter) : ' — Shule Zote'}</span>
+      <div class="toolbar-actions">
+        <button class="btn ghost" onclick="printCurrentView()">🖨 Chapisha</button>
+        <button class="btn primary" onclick="downloadOverallCsv()">⬇ Pakua CSV</button>
+      </div>
+    </div>
+    ${sorted.length>0 ? topBottomHtml(sorted, s=> averageOf(s)) : `<p class="empty">Bado hakuna alama zilizojazwa.</p>`}
+    <div class="table-wrap">
+      <table class="results-table">
+        <thead><tr>
+          <th>Nafasi</th><th>Jina</th><th>Namba</th><th>Shule</th>
+          ${SUBJECTS.map(s=> `<th>${s}</th>`).join('')}
+          <th>Jumla</th><th>Wastani</th><th>Ukamilifu</th><th>Daraja</th><th>Maoni</th>
+        </tr></thead>
+        <tbody>
+          ${list.slice().sort((a,b)=> averageOf(b)-averageOf(a)).map((s,i)=> `
+            <tr>
+              <td>${i+1}</td>
+              <td class="name-cell">${escapeHtml(s.name)}</td>
+              <td>${escapeHtml(s.examNumber)}</td>
+              <td>${escapeHtml(s.school)}</td>
+              ${SUBJECTS.map(subj=> `<td>${hasScore(s,subj) ? s.scores[subj] : '—'}</td>`).join('')}
+              <td>${totalOf(s)}</td>
+              <td>${averageOf(s).toFixed(1)}</td>
+              <td>${enteredSubjects(s).length}/${SUBJECTS.length}</td>
+              <td><span class="tag ${gradeClass(overallGrade(s))}">${overallGrade(s)}</span></td>
+              <td>${commentOf(s)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+function subjectTabHtml(list, subj){
+  const sorted = list.filter(s=> hasScore(s,subj)).slice().sort((a,b)=> (b.scores[subj])-(a.scores[subj]));
+  if(sorted.length===0) return `<p class="empty">Hakuna alama zilizojazwa bado kwa ${escapeHtml(subj)}${portalSchoolFilter ? ' - '+escapeHtml(portalSchoolFilter) : ''}.</p>`;
+  return `
+    ${printHeaderHtml(subj + (portalSchoolFilter ? ' — ' + portalSchoolFilter : ' — Shule Zote Tatu'))}
+    <div class="panel-toolbar">
+      <span class="count-pill">${sorted.length} wanafunzi wenye alama${portalSchoolFilter ? ' — '+escapeHtml(portalSchoolFilter) : ' — Shule Zote'}</span>
+      <div class="toolbar-actions">
+        <button class="btn ghost" onclick="printCurrentView()">🖨 Chapisha</button>
+        <button class="btn primary" onclick="downloadSubjectCsv('${subj}')">⬇ Pakua CSV</button>
+      </div>
+    </div>
+    ${topBottomHtml(sorted, s=> s.scores[subj])}
+    <div class="table-wrap">
+      <table class="results-table">
+        <thead><tr><th>Nafasi</th><th>Jina</th><th>Namba</th><th>Shule</th><th>Alama</th><th>Daraja</th></tr></thead>
+        <tbody>
+          ${sorted.map((s,i)=> `
+            <tr>
+              <td>${i+1}</td>
+              <td class="name-cell">${escapeHtml(s.name)}</td>
+              <td>${escapeHtml(s.examNumber)}</td>
+              <td>${escapeHtml(s.school)}</td>
+              <td>${s.scores[subj]}</td>
+              <td><span class="tag grade-${gradeLetter(s.scores[subj])}">${gradeLetter(s.scores[subj])}</span></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+function computeStats(students){
+  students = students || state.students;
+  const dist = {};
+  SUBJECTS.forEach(subj=> dist[subj] = {A:0,B:0,C:0,D:0,F:0});
+  students.forEach(s=>{
+    SUBJECTS.forEach(subj=>{ if(hasScore(s,subj)) dist[subj][gradeLetter(s.scores[subj])]++; });
+  });
+
+  const bySchool = {};
+  SCHOOLS.forEach(sc=> bySchool[sc] = students.filter(s=> s.school===sc));
+
+  const overallAvgBySchool = {};
+  SCHOOLS.forEach(sc=>{
+    const list = bySchool[sc].filter(s=> enteredSubjects(s).length>0);
+    overallAvgBySchool[sc] = list.length ? list.reduce((sum,s)=> sum+averageOf(s),0)/list.length : 0;
+  });
+
+  // GPA ya jumla ya shule (masomo yote yaliyojazwa, wanafunzi wote) — ndogo ni bora.
+  const overallGpaBySchool = {};
+  SCHOOLS.forEach(sc=>{
+    let sum = 0, count = 0;
+    bySchool[sc].forEach(s=>{
+      SUBJECTS.forEach(subj=>{
+        if(hasScore(s,subj)){ sum += gradePoint(gradeLetter(s.scores[subj])); count++; }
+      });
+    });
+    overallGpaBySchool[sc] = count ? sum / count : 0;
+  });
+  const rankOverall = SCHOOLS.slice().sort((a,b)=> overallGpaBySchool[a]-overallGpaBySchool[b]);
+
+  const subjectSchoolStats = {};
+  SUBJECTS.forEach(subj=>{
+    const rows = SCHOOLS.map(sc=>{
+      const list = bySchool[sc].filter(s=> hasScore(s,subj));
+      const counts = {A:0,B:0,C:0,D:0,F:0};
+      let points = 0;
+      list.forEach(s=>{
+        const g = gradeLetter(s.scores[subj]);
+        counts[g]++;
+        points += gradePoint(g);
+      });
+      return { school: sc, sat: list.length, counts, gpa: list.length ? points/list.length : 0 };
+    });
+    rows.sort((a,b)=> a.gpa - b.gpa); // GPA ndogo = bora zaidi
+    subjectSchoolStats[subj] = rows;
+  });
+
+  return { dist, overallAvgBySchool, overallGpaBySchool, rankOverall, subjectSchoolStats };
+}
+function statsBodyHtml(stats){
+  const { dist, overallAvgBySchool, overallGpaBySchool, rankOverall, subjectSchoolStats } = stats;
+  return `
+    <h3 class="stats-title">Idadi ya Madaraja (A – F)</h3>
+    <div class="table-wrap">
+      <table class="results-table">
+        <thead><tr><th>Somo</th><th>A</th><th>B</th><th>C</th><th>D</th><th>F</th></tr></thead>
+        <tbody>
+          ${Object.keys(dist).map(k=> `
+            <tr><td class="name-cell">${escapeHtml(k)}</td><td>${dist[k].A}</td><td>${dist[k].B}</td><td>${dist[k].C}</td><td>${dist[k].D}</td><td>${dist[k].F}</td></tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+    <h3 class="stats-title">Nafasi ya Shule (kwa GPA)</h3>
+    <ol class="rank-list">
+      ${rankOverall.map((sc,i)=> `<li><span class="rank-badge">${i+1}</span>${escapeHtml(sc)}<span class="rank-value">GPA ${overallGpaBySchool[sc].toFixed(2)} · Wastani ${overallAvgBySchool[sc].toFixed(2)}</span></li>`).join('')}
+    </ol>
+    <h3 class="stats-title">Nafasi ya Shule kwa Kila Somo</h3>
+    ${SUBJECTS.map(subj=> `
+      <div class="subject-rank">
+        <h4>${escapeHtml(subj)}</h4>
+        <div class="table-wrap">
+          <table class="results-table">
+            <thead><tr>
+              <th>Nafasi</th><th>Shule</th><th>Waliofanya</th><th>A</th><th>B</th><th>C</th><th>D</th><th>F</th><th>GPA</th>
+            </tr></thead>
+            <tbody>
+              ${subjectSchoolStats[subj].map((row,i)=> `
+                <tr>
+                  <td><span class="rank-badge">${i+1}</span></td>
+                  <td class="name-cell">${escapeHtml(row.school)}</td>
+                  <td>${row.sat}</td>
+                  <td>${row.counts.A}</td>
+                  <td>${row.counts.B}</td>
+                  <td>${row.counts.C}</td>
+                  <td>${row.counts.D}</td>
+                  <td>${row.counts.F}</td>
+                  <td>${row.gpa.toFixed(2)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `).join('')}
+  `;
+}
+// Toleo jepesi la takwimu — kwa maoni ya shule moja tu (bila kulinganisha na shule nyingine)
+function gradeDistOnlyHtml(list){
+  const dist = {};
+  SUBJECTS.forEach(subj=> dist[subj] = {A:0,B:0,C:0,D:0,F:0});
+  list.forEach(s=>{
+    SUBJECTS.forEach(subj=>{ if(hasScore(s,subj)) dist[subj][gradeLetter(s.scores[subj])]++; });
+  });
+  return `
+    <h3 class="stats-title">Idadi ya Madaraja (A – F)</h3>
+    <div class="table-wrap">
+      <table class="results-table">
+        <thead><tr><th>Somo</th><th>A</th><th>B</th><th>C</th><th>D</th><th>F</th></tr></thead>
+        <tbody>
+          ${Object.keys(dist).map(k=> `
+            <tr><td class="name-cell">${escapeHtml(k)}</td><td>${dist[k].A}</td><td>${dist[k].B}</td><td>${dist[k].C}</td><td>${dist[k].D}</td><td>${dist[k].F}</td></tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+function statsTabHtml(){
+  const students = state.students;
+  if(students.length===0) return `<p class="empty">Hakuna data bado.</p>`;
+
+  const stats = computeStats(students);
+
+  return `
+    ${printHeaderHtml('Takwimu za Kata')}
+    <div class="panel-toolbar">
+      <span class="count-pill">${students.length} wanafunzi kwa jumla</span>
+      <div class="toolbar-actions">
+        <button class="btn ghost" onclick="printCurrentView()">🖨 Chapisha</button>
+        <button class="btn primary" onclick="downloadStatsCsv()">⬇ Pakua CSV</button>
+      </div>
+    </div>
+    ${statsBodyHtml(stats)}
+  `;
+}
+
+// =====================================================================
+// ADMIN
+// =====================================================================
+function showAdminLogin(){
+  app.innerHTML = `
+    <header class="bar">
+      <button class="back" onclick="showHome()">← Nyuma</button>
+      <h1>Admin Login</h1>
+    </header>
+    <div class="center-card">
+      ${stampSVG('adminlogin',70)}
+      <input type="password" id="adminPassInput" placeholder="Password ya Admin">
+      <p class="modal-error" id="adminLoginErr" hidden>Password si sahihi.</p>
+      <button class="btn primary block" onclick="submitAdminLogin()">Ingia</button>
+    </div>
+  `;
+  const el = document.getElementById('adminPassInput');
+  el.focus();
+  el.addEventListener('keydown', e=>{ if(e.key==='Enter') submitAdminLogin(); });
+}
+function submitAdminLogin(){
+  const val = document.getElementById('adminPassInput').value;
+  if(val === state.adminPassword) showAdminPanel();
+  else document.getElementById('adminLoginErr').hidden = false;
+}
+function showAdminPanel(){
+  app.innerHTML = `
+    <header class="bar">
+      <button class="back" onclick="showHome()">← Nyuma</button>
+      <h1>Dashibodi ya Admin</h1>
+    </header>
+    <div class="admin-grid">
+      <section class="admin-card" style="grid-column:1 / -1; ${state.locked ? 'border-color:#f0c9c2;' : 'border-color:#cfe8da;'}">
+        <h2>Udhibiti wa Kujaza Alama</h2>
+        <p style="color:var(--ink-soft); font-size:.9rem;">
+          ${state.locked
+            ? '🔒 Alama zimefungwa — walimu hawawezi kujaza, kuhariri, au kuandikisha wanafunzi kwa sasa.'
+            : '🔓 Walimu wanaruhusiwa kujaza na kuhariri alama na majina kwa sasa.'}
+        </p>
+        ${state.locked
+          ? `<button class="btn primary" onclick="doToggleLock(false)">🔓 Ruhusu Kujaza Alama Upya</button>`
+          : `<button class="btn danger" onclick="confirmLock()">🔒 Hifadhi na Funga Alama</button>`}
+      </section>
+      <section class="admin-card" style="grid-column:1 / -1;">
+        <h2>Kichwa cha Ripoti — Mwezi/Muhula wa Sasa</h2>
+        <p style="color:var(--ink-soft); font-size:.9rem;">Hii inaonekana kwenye vichwa vya kila ripoti unayopakua au kuchapisha (mfano: "Julai 2026" au "Muhula wa Kwanza 2026").</p>
+        <input type="text" id="periodLabelInput" placeholder="Mfano: Julai 2026" value="${escapeHtml(state.currentPeriodLabel || '')}">
+        <button class="btn primary" onclick="doSavePeriodLabel()">Hifadhi</button>
+      </section>
+      <section class="admin-card">
+        <h2>Badilisha Password ya Admin</h2>
+        <input type="password" id="newAdminPass" placeholder="Password Mpya">
+        <button class="btn primary" onclick="doChangeAdminPassword()">Hifadhi</button>
+      </section>
+      <section class="admin-card">
+        <h2>Weka Upya Password za Walimu</h2>
+        ${SCHOOLS.map(sc=> `
+          <div class="inline-field">
+            <label>${escapeHtml(sc)}</label>
+            <input type="text" id="pass_${schoolId(sc)}" placeholder="Password Mpya">
+            <button class="btn ghost" onclick="doResetTeacherPassword('${sc}')">Weka Upya</button>
+          </div>
+        `).join('')}
+      </section>
+      <section class="admin-card">
+        <h2>Hifadhi Matokeo kwa Mwezi</h2>
+        <input type="text" id="archiveLabel" placeholder="Mfano: Januari 2026">
+        <button class="btn primary" ${state.students.length===0 ? 'disabled' : ''} onclick="doArchive()">Hifadhi Matokeo ya Sasa</button>
+        ${Object.keys(state.archives).length ? `
+          <div class="archive-list">
+            <h4>Yaliyohifadhiwa</h4>
+            ${Object.keys(state.archives).map(label=> `
+              <div class="archive-row">
+                <div>
+                  <strong>📁 ${escapeHtml(label)}</strong><br>
+                  <span class="mono">${state.archives[label].length} wanafunzi</span>
+                </div>
+                <button class="btn ghost" onclick="showAdminArchiveDetail('${jsAttr(label)}')">Tazama →</button>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+      </section>
+      <section class="admin-card danger-card">
+        <h2>Futa Alama Zote za Sasa</h2>
+        <p>Hii itafuta ALAMA za wanafunzi wote (majina na namba za mtihani zitabaki, tayari kwa muhula mpya). Hakikisha umeshahifadhi (archive) matokeo kabla ya kufuta.</p>
+        <button class="btn danger" ${state.students.length===0 ? 'disabled' : ''} onclick="confirmDeleteAll()">Futa Alama Zote</button>
+      </section>
+    </div>
+  `;
+}
+function doSavePeriodLabel(){
+  const el = document.getElementById('periodLabelInput');
+  state.currentPeriodLabel = el.value.trim();
+  saveState();
+  toast('Kichwa cha ripoti kimehifadhiwa.');
+}
+function doChangeAdminPassword(){
+  const el = document.getElementById('newAdminPass');
+  const v = el.value.trim();
+  if(!v) return;
+  state.adminPassword = v;
+  saveState();
+  el.value = '';
+  toast('Password ya Admin imebadilishwa.');
+}
+function confirmLock(){
+  openModal(`
+    <h2>Funga Uingizaji wa Alama?</h2>
+    <p>Walimu hawataweza kujaza, kuhariri, wala kuandikisha wanafunzi mpaka uwaruhusu tena.</p>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeModal()">Ghairi</button>
+      <button class="btn danger" onclick="doToggleLock(true)">Funga</button>
+    </div>
+  `);
+}
+function doToggleLock(lock){
+  state.locked = lock;
+  saveState();
+  closeModal();
+  toast(lock ? 'Alama zimefungwa.' : 'Walimu wanaruhusiwa kujaza alama tena.');
+  showAdminPanel();
+}
+function doResetTeacherPassword(sc){
+  const el = document.getElementById('pass_' + schoolId(sc));
+  const v = el.value.trim();
+  if(!v) return;
+  state.teacherPasswords[sc] = v;
+  state.teacherPasswordChanged[sc] = false; // alazimike kuibadili tena akiingia
+  saveState();
+  el.value = '';
+  toast(`Password ya ${sc} imewekwa upya. Mwalimu atalazimika kuibadili akiingia.`);
+}
+function doArchive(){
+  const el = document.getElementById('archiveLabel');
+  const label = el.value.trim();
+  if(!label) return;
+  state.archives[label] = JSON.parse(JSON.stringify(state.students));
+  saveState();
+  toast('Matokeo yamehifadhiwa.');
+  showAdminPanel();
+}
+function showAdminArchiveDetail(label, schoolFilter){
+  const all = state.archives[label] || [];
+  const list = schoolFilter ? all.filter(s=> s.school===schoolFilter) : all;
+  app.innerHTML = `
+    <header class="bar">
+      <button class="back" onclick="showAdminPanel()">← Nyuma</button>
+      <h1>${escapeHtml(label)}</h1>
+    </header>
+    ${printHeaderHtml('Matokeo Yaliyohifadhiwa — ' + label + (schoolFilter ? ' — ' + schoolFilter : ''))}
+    <div class="tabs no-print">
+      <button class="tab ${!schoolFilter?'active':''}" onclick="showAdminArchiveDetail('${jsAttr(label)}')">Shule Zote</button>
+      ${SCHOOLS.map(sc=> `<button class="tab ${schoolFilter===sc?'active':''}" onclick="showAdminArchiveDetail('${jsAttr(label)}','${jsAttr(sc)}')">${escapeHtml(sc)}</button>`).join('')}
+    </div>
+    <div class="panel-toolbar">
+      <span class="count-pill">${list.length} wanafunzi</span>
+      <div class="toolbar-actions">
+        <button class="btn ghost" onclick="printCurrentView()">🖨 Chapisha</button>
+        <button class="btn primary" ${list.length===0?'disabled':''} onclick="downloadArchiveCsv('${jsAttr(label)}'${schoolFilter ? ",'"+jsAttr(schoolFilter)+"'" : ''})">⬇ Pakua CSV</button>
+      </div>
+    </div>
+    ${list.length===0 ? `<p class="empty">Hakuna data kwenye hifadhi hii.</p>` : resultsTableHtml(list) + (schoolFilter ? gradeDistOnlyHtml(list) : statsBodyHtml(computeStats(list)))}
+  `;
+}
+function confirmDeleteAll(){
+  openModal(`
+    <h2>Uhakika?</h2>
+    <p>Kitendo hiki kitafuta ALAMA za wanafunzi wote wa sasa. Majina na namba za mtihani zitabaki. Huwezi kurudisha nyuma.</p>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeModal()">Ghairi</button>
+      <button class="btn danger" onclick="doDeleteAll()">Futa Alama</button>
+    </div>
+  `);
+}
+function doDeleteAll(){
+  state.students.forEach(s=> s.scores = {});
+  saveState();
+  closeModal();
+  toast('Alama zote zimefutwa — majina yamebaki.');
+  showAdminPanel();
+}
+
+// =====================================================================
+// INIT
+// =====================================================================
+showHome();
+</script>
+</body>
+</html>
